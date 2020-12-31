@@ -18,6 +18,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		7CBF64A3259DEA9900D59903 /* ofxImageEffect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxImageEffect.h; path = ../../openfx/include/ofxImageEffect.h; sourceTree = "<group>"; };
 		7EF36FB616F29701002A3CB3 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		8F8764DF1F74F0970035727D /* Effect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Effect.cpp; path = ../Effect.cpp; sourceTree = "<group>"; };
 		8F8764E01F74F0970035727D /* 8link.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = 8link.cpp; path = ../8link.cpp; sourceTree = "<group>"; };
@@ -34,7 +35,7 @@
 		8F8764F01F74F0AD0035727D /* util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = util.h; path = ../util.h; sourceTree = "<group>"; };
 		8F8764F11F74F0AD0035727D /* upMode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = upMode.cpp; path = ../upMode.cpp; sourceTree = "<group>"; };
 		8F8764F21F74F0AD0035727D /* version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = version.h; path = ../version.h; sourceTree = "<group>"; };
-		C4E618CC095A3CE80012CA3F /* smooth.plugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = smooth.plugin; sourceTree = BUILT_PRODUCTS_DIR; };
+		C4E618CC095A3CE80012CA3F /* smooth.ofx.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = smooth.ofx.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,7 +77,7 @@
 		C4E6188C095A3C800012CA3F /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				C4E618CC095A3CE80012CA3F /* smooth.plugin */,
+				C4E618CC095A3CE80012CA3F /* smooth.ofx.bundle */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -84,6 +85,7 @@
 		D0FE57630993C4FD00139A60 /* Supporting Code */ = {
 			isa = PBXGroup;
 			children = (
+				7CBF64A3259DEA9900D59903 /* ofxImageEffect.h */,
 			);
 			name = "Supporting Code";
 			sourceTree = "<group>";
@@ -106,7 +108,7 @@
 			);
 			name = smooth;
 			productName = Skeleton.plugin;
-			productReference = C4E618CC095A3CE80012CA3F /* smooth.plugin */;
+			productReference = C4E618CC095A3CE80012CA3F /* smooth.ofx.bundle */;
 			productType = "com.apple.product-type.bundle";
 		};
 /* End PBXNativeTarget section */
@@ -122,6 +124,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = C4E6187C095A3C800012CA3F;
@@ -236,10 +239,11 @@
 				GENERATE_PKGINFO_FILE = YES;
 				INFOPLIST_FILE = "smooth.plugin-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 11.1;
 				PRODUCT_BUNDLE_IDENTIFIER = tv.loilo.smooth;
 				PRODUCT_NAME = smooth;
 				SDKROOT = macosx;
+				WRAPPER_EXTENSION = ofx.bundle;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -308,10 +312,11 @@
 				GENERATE_PKGINFO_FILE = YES;
 				INFOPLIST_FILE = "smooth.plugin-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 11.1;
 				PRODUCT_BUNDLE_IDENTIFIER = tv.loilo.smooth;
 				PRODUCT_NAME = smooth;
 				SDKROOT = macosx;
+				WRAPPER_EXTENSION = ofx.bundle;
 				ZERO_LINK = NO;
 			};
 			name = Debug;

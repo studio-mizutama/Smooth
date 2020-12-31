@@ -1,28 +1,17 @@
 # SMOOTH
-アニメーションのスムージングを行うAfterEffects用のプラグインです。  
-もともと有償で販売していたものをオープンソース化しました。
+Porting Smooth, AfterEffects plug-in created by Loilo, to OpenFX.
+[Smooth](https://github.com/loilo-inc/smooth) performs animation smoothing processing.　This plug-in is essential for compositing animation.
 
-AfterEffects CC2017で使えるように、最新のビルド環境に対応させています。  
-ライセンスはApache2.0です。派生品の開発やインハウスでのカスタマイズなどご自由にご利用ください。  
+## How to build
 
-## ダウンロード
-バイナリーはこちらからダウンロードできます。
+```
+|
+`- sdk/ (rename After Effects CC2020 SDK)
+`- openfx/ (https://github.com/ofxa/openfx)
+`- Smooth/
+```
 
-Mac  
-http://assets.loilo.tv/smooth/smooth.Mac.1.4.0.zip
-
-Windows  
-http://assets.loilo.tv/smooth/smooth.Win.1.4.0.zip
-
-
-## ライセンス
-Apache2.0
-
-## ビルド方法
-### Win
-Windows10 64bit / VisualStudio2017  
-AfterEffects CC2017 SDKをダウロードしてsmoothと同じ階層のディレクトリに置いてください。
-
-### Mac
-MacOSX Sierra / XCode9.0  
-AfterEffects CC2017 SDKをダウロードして、sdkとリネーム後、smoothと同じ階層のディレクトリに置いてください。
+```sh
+cd Smooth
+make
+```
