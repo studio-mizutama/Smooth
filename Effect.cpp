@@ -863,7 +863,7 @@ static OfxStatus smoothing(OfxImageEffectHandle instance,
     gParameterSuite->paramGetValueAtTime(myData->rangeParam, time, &range);
     gParameterSuite->paramGetValueAtTime(myData->lineWeightParam, time, &lineWeight);
     gParameterSuite->paramGetValueAtTime(myData->whiteOptionParam, time, &whiteOption);
-    PF_Err	err;
+    //PF_Err	err;
 	PF_Rect extent_hint;
     BEGIN_PROFILE();
 	
@@ -1276,7 +1276,7 @@ static OfxStatus smoothing(OfxImageEffectHandle instance,
 
     END_PROFILE();
 
-	return err;
+	//return err;
 }
 
 
@@ -1476,7 +1476,7 @@ OfxStatus RenderAction( OfxImageEffectHandle instance,
     gPropertySuite->propGetString(outputImg, kOfxImageEffectPropPixelDepth, 0, &cstr);
     std::string dataType = cstr;
 
-    PF_Err err = PF_Err_NONE;
+    //PF_Err err = PF_Err_NONE;
 	  PF_LayerDef *input  = 0;
     PF_InData       *in_data;
     PF_LayerDef *output;
