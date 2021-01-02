@@ -7,12 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		7EF36FB716F29701002A3CB3 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7EF36FB616F29701002A3CB3 /* Cocoa.framework */; };
 		8F8764E81F74F0980035727D /* Effect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F8764DF1F74F0970035727D /* Effect.cpp */; };
 		8F8764E91F74F0980035727D /* 8link.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F8764E01F74F0970035727D /* 8link.cpp */; };
 		8F8764EA1F74F0980035727D /* downMode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F8764E31F74F0970035727D /* downMode.cpp */; };
 		8F8764EB1F74F0980035727D /* Lack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F8764E51F74F0980035727D /* Lack.cpp */; };
-		8F8764F31F74F0AD0035727D /* Pipl.r in Rez */ = {isa = PBXBuildFile; fileRef = 8F8764ED1F74F0AC0035727D /* Pipl.r */; };
 		8F8764F41F74F0AD0035727D /* util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F8764EE1F74F0AC0035727D /* util.cpp */; };
 		8F8764F51F74F0AD0035727D /* upMode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8F8764F11F74F0AD0035727D /* upMode.cpp */; };
 /* End PBXBuildFile section */
@@ -43,7 +41,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7EF36FB716F29701002A3CB3 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -152,7 +149,6 @@
 			isa = PBXRezBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8F8764F31F74F0AD0035727D /* Pipl.r in Rez */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -240,6 +236,7 @@
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				COMBINE_HIDPI_IMAGES = YES;
+				EXECUTABLE_EXTENSION = "";
 				GCC_MODEL_TUNING = G5;
 				GENERATE_PKGINFO_FILE = YES;
 				INFOPLIST_FILE = "smooth.plugin-Info.plist";
@@ -318,6 +315,7 @@
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				COMBINE_HIDPI_IMAGES = YES;
+				EXECUTABLE_EXTENSION = "";
 				GCC_MODEL_TUNING = G5;
 				GENERATE_PKGINFO_FILE = YES;
 				INFOPLIST_FILE = "smooth.plugin-Info.plist";

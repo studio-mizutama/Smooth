@@ -1,6 +1,6 @@
 NAME = Effect
 # where are our OFX headers
-OFX_INC_DIR = -I../openfx/include -I./ -I../sdk/Examples/Headers
+OFX_INC_DIR = -I../sdk/Examples/Headers -I../openfx/include
 
 # by default we don't optimise
 OPTIMISE = -g
@@ -23,10 +23,24 @@ CXXFLAGS = $(OFX_INC_DIR) $(OPTIMISE) $(OS_CXXFLAGS)
 .PHONY: clean install
 
 # make our ofx bundle
-$(NAME).ofx : $(NAME).o
+$(NAME).ofx : $(NAME).o 8link.o downMode.o Lack.o upMode.o util.o
 	$(CXX) $(OS_LDFLAGS) $< -o $@
 	mkdir -p $@.bundle/Contents/$(OS_BUNDLE_DIR)/
 	cp $@ $@.bundle/Contents/$(OS_BUNDLE_DIR)/
+
+$(NAME).o : $(NAME).cpp
+	$(CXX) -c $(NAME).cpp
+
+8link.o : 8link.cpp
+	$(CXX) -c 8link.cpp
+downMode.o : downMode.cpp
+	$(CXX) -c downMode.cpp
+Lack.o : Lack.cpp
+	$(CXX) -c Lack.cpp
+upMode.o : upMode.cpp
+	$(CXX) -c upMode.cpp
+util.o : util.cpp
+	$(CXX) -c util.cpp
 
 # install it
 install : $(NAME).ofx

@@ -3,9 +3,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "AE_Effect.h"
-#include "AE_EffectCB.h"
-#include "AE_Macros.h"
+#include "../sdk/Examples/Headers/AE_Effect.h"
+#include "../sdk/Examples/Headers/AE_EffectCB.h"
+#include "../sdk/Examples/Headers/AE_Macros.h"
 
 //#include "Param_Utils.h"
 //#include "version.h"
@@ -28,7 +28,7 @@
 #include <iostream>
 
 // the one OFX header we need, it includes the others necessary
-#include "ofxImageEffect.h"
+#include "../openfx/include/ofxImageEffect.h"
 
 #if defined __APPLE__ || defined linux
 #  define EXPORT __attribute__((visibility("default")))
