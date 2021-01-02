@@ -24,23 +24,22 @@ CXXFLAGS = $(OFX_INC_DIR) $(OPTIMISE) $(OS_CXXFLAGS)
 
 # make our ofx bundle
 $(NAME).ofx : $(NAME).o 8link.o downMode.o Lack.o upMode.o util.o
-	$(CXX) $(OS_LDFLAGS) $< -o $@
+	$(CXX) $(OS_LDFLAGS) $(NAME).o 8link.o downMode.o Lack.o upMode.o util.o -o $@
 	mkdir -p $@.bundle/Contents/$(OS_BUNDLE_DIR)/
 	cp $@ $@.bundle/Contents/$(OS_BUNDLE_DIR)/
 
-$(NAME).o : $(NAME).cpp
-	$(CXX) -c $(NAME).cpp
-
 8link.o : 8link.cpp
-	$(CXX) -c 8link.cpp
+	$(CXX) $(CXXFLAGS) -c 8link.cpp
 downMode.o : downMode.cpp
-	$(CXX) -c downMode.cpp
+	$(CXX) $(CXXFLAGS) -c downMode.cpp
 Lack.o : Lack.cpp
-	$(CXX) -c Lack.cpp
+	$(CXX) $(CXXFLAGS) -c Lack.cpp
 upMode.o : upMode.cpp
-	$(CXX) -c upMode.cpp
+	$(CXX) $(CXXFLAGS) -c upMode.cpp
 util.o : util.cpp
-	$(CXX) -c util.cpp
+	$(CXX) $(CXXFLAGS) -c util.cpp
+$(NAME).o : $(NAME).cpp
+	$(CXX) $(CXXFLAGS) -c $(NAME).cpp
 
 # install it
 install : $(NAME).ofx
@@ -51,4 +50,4 @@ install : $(NAME).ofx
 clean :
 	rm -rf $(NAME).ofx.bundle
 	rm -rf $(NAME).ofx
-	rm -rf $(NAME).o
+	rm -rf *.o

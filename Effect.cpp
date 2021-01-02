@@ -3,9 +3,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "../sdk/Examples/Headers/AE_Effect.h"
-#include "../sdk/Examples/Headers/AE_EffectCB.h"
-#include "../sdk/Examples/Headers/AE_Macros.h"
+#include "AE_Effect.h"
+#include "AE_EffectCB.h"
+#include "AE_Macros.h"
 
 //#include "Param_Utils.h"
 //#include "version.h"
@@ -821,6 +821,7 @@ static PF_Err GlobalSetdown(PF_InData       *in_data,
 //---------------------------------------------------------------------------//
 template<typename PixelType, typename PackedPixelType>
 static OfxStatus smoothing(OfxImageEffectHandle instance,
+PF_InData   *in_data,
 						PF_LayerDef *input,
 						PF_LayerDef *output,
 						PixelType	*in_ptr,
@@ -830,6 +831,7 @@ static OfxStatus smoothing(OfxImageEffectHandle instance,
             OfxRectI renderWindow,
             int nComps)
 {
+  OfxTime time;
   // fetch output image info from the property handle
   int dstRowBytes;
   OfxRectI dstBounds;
@@ -853,36 +855,30 @@ static OfxStatus smoothing(OfxImageEffectHandle instance,
   if(srcPtr == NULL) {
     throw "Bad source pointer";
   }
-
-	OfxTime time;
-    MyInstanceData *myData = FetchInstanceData(instance);
-    double range = 1.0;
-    double lineWeight = 1.0;
-    double weight;
-    int whiteOption = 0;
-    gParameterSuite->paramGetValueAtTime(myData->rangeParam, time, &range);
-    gParameterSuite->paramGetValueAtTime(myData->lineWeightParam, time, &lineWeight);
-    gParameterSuite->paramGetValueAtTime(myData->whiteOptionParam, time, &whiteOption);
-    //PF_Err	err;
+  PF_Err	err;
+  MyInstanceData *myData = FetchInstanceData(instance);
 	PF_Rect extent_hint;
     BEGIN_PROFILE();
-	
+	  unsigned int rangeI = 1;
+    float lineWeightI = 1.0;
+    int whiteOption = 0;
+    gParameterSuite->paramGetValueAtTime(myData->rangeParam, time, &rangeI);
+    gParameterSuite->paramGetValueAtTime(myData->lineWeightParam, time, &lineWeightI);
+    gParameterSuite->paramGetValueAtTime(myData->whiteOptionParam, time, &whiteOption);
 
 	// 白抜き & 領域情報取得
 	preProcess<PixelType>(	in_ptr,
 							input->rowbytes, input->height,
 							&extent_hint,
-							myData->whiteOptionParam );
+							whiteOption != 0 );
 	
-    //err = PF_COPY(input, output, NULL, NULL);
-
-    
+    err = PF_COPY(input, output, NULL, NULL);
     int     in_width,in_height, out_width, out_height, i,j;
     long    in_target, out_target;
-    range = (range * (getMaxValue<PixelType>() * 4)) / 100; 
-    lineWeight = (lineWeight / 2.0 + 0.5),
-                weight;
+    unsigned int range = (rangeI * (getMaxValue<PixelType>() * 4)) / 100; 
+    float lineWeight = lineWeightI / 2.0 + 0.5;
     bool        lack_flg;
+    float weight;
 
     in_width    = GET_WIDTH(input);
     in_height   = GET_HEIGHT(input);
@@ -1276,7 +1272,7 @@ static OfxStatus smoothing(OfxImageEffectHandle instance,
 
     END_PROFILE();
 
-	//return err;
+	return err;
 }
 
 
@@ -1420,7 +1416,7 @@ void PixelProcessing(OfxImageEffectHandle instance,
 // Render an output image
 OfxStatus RenderAction( OfxImageEffectHandle instance,
                         OfxPropertySetHandle inArgs,
-                        OfxPropertySetHandle outArgs,PF_LayerDef *output)
+                        OfxPropertySetHandle outArgs,PF_LayerDef *output,PF_InData       *in_data)
 {
   // get the render window and the time from the inArgs
   OfxTime time;
@@ -1478,26 +1474,24 @@ OfxStatus RenderAction( OfxImageEffectHandle instance,
 
     //PF_Err err = PF_Err_NONE;
 	  PF_LayerDef *input  = 0;
-    //PF_InData       *in_data;
     //PF_LayerDef *output;
 	  PF_Pixel16	*in_ptr16, *out_ptr16;
-	  //PF_GET_PIXEL_DATA16(output, NULL, &out_ptr16 );
-	  //PF_GET_PIXEL_DATA16(input, NULL, &in_ptr16 );
+	  PF_GET_PIXEL_DATA16(output, NULL, &out_ptr16 );
+	  PF_GET_PIXEL_DATA16(input, NULL, &in_ptr16 );
 
 	  if(dataType == kOfxBitDepthByte)
 	  {
 	  	// 8bpc
 	  	PF_Pixel8	*in_ptr8, *out_ptr8;
-	  	//PF_GET_PIXEL_DATA8(output, NULL, &out_ptr8 );
-	  	//PF_GET_PIXEL_DATA8(input, NULL, &in_ptr8 );
+	  	PF_GET_PIXEL_DATA8(output, NULL, &out_ptr8 );
+	  	PF_GET_PIXEL_DATA8(input, NULL, &in_ptr8 );
   
-	  	smoothing<PF_Pixel8, KP_PIXEL32>(instance,
+	  	smoothing<PF_Pixel8, KP_PIXEL32>(instance,in_data,
 	  											input, output, in_ptr8, out_ptr8, sourceImg, outputImg, renderWindow, nComps);
 	  }
-	  else 
-    {
+	  else {
 	  	// 16bpc or 32bpc
-	  	smoothing<PF_Pixel16, KP_PIXEL64>(instance, 
+	  	smoothing<PF_Pixel16, KP_PIXEL64>(instance, in_data,
 	  											input, output, in_ptr16, out_ptr16, sourceImg, outputImg, renderWindow, nComps);
 	  }
     /*if(dataType == kOfxBitDepthByte) {
@@ -1595,6 +1589,7 @@ OfxStatus MainEntryPoint(const char *action, const void *handle, OfxPropertySetH
   OfxImageEffectHandle effect = (OfxImageEffectHandle) handle;
   PF_Err      err = PF_Err_NONE;
   PF_LayerDef *output;
+  PF_InData       *in_data;
   OfxStatus returnStatus = kOfxStatReplyDefault;
   if(strcmp(action, kOfxActionLoad) == 0) {
     // The very first action called on a plugin.
@@ -1622,7 +1617,7 @@ OfxStatus MainEntryPoint(const char *action, const void *handle, OfxPropertySetH
   }
   else if(strcmp(action, kOfxImageEffectActionRender) == 0) {
     // action called to render a frame
-    returnStatus = RenderAction(effect, inArgs, outArgs,output);
+    returnStatus = RenderAction(effect, inArgs, outArgs,output,in_data);
   }
 
   MESSAGE(": END action is : %s \n", action );
