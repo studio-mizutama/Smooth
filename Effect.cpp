@@ -21,7 +21,7 @@
 
 //#include "Effect.h"
 
-#include <string.h>
+//#include <string.h>
 #include <math.h>
 
 #include <string>
@@ -1420,7 +1420,7 @@ void PixelProcessing(OfxImageEffectHandle instance,
 // Render an output image
 OfxStatus RenderAction( OfxImageEffectHandle instance,
                         OfxPropertySetHandle inArgs,
-                        OfxPropertySetHandle outArgs)
+                        OfxPropertySetHandle outArgs,PF_LayerDef *output)
 {
   // get the render window and the time from the inArgs
   OfxTime time;
@@ -1478,18 +1478,18 @@ OfxStatus RenderAction( OfxImageEffectHandle instance,
 
     //PF_Err err = PF_Err_NONE;
 	  PF_LayerDef *input  = 0;
-    PF_InData       *in_data;
-    PF_LayerDef *output;
+    //PF_InData       *in_data;
+    //PF_LayerDef *output;
 	  PF_Pixel16	*in_ptr16, *out_ptr16;
-	  PF_GET_PIXEL_DATA16(output, NULL, &out_ptr16 );
-	  PF_GET_PIXEL_DATA16(input, NULL, &in_ptr16 );
+	  //PF_GET_PIXEL_DATA16(output, NULL, &out_ptr16 );
+	  //PF_GET_PIXEL_DATA16(input, NULL, &in_ptr16 );
 
 	  if(dataType == kOfxBitDepthByte)
 	  {
 	  	// 8bpc
 	  	PF_Pixel8	*in_ptr8, *out_ptr8;
-	  	PF_GET_PIXEL_DATA8(output, NULL, &out_ptr8 );
-	  	PF_GET_PIXEL_DATA8(input, NULL, &in_ptr8 );
+	  	//PF_GET_PIXEL_DATA8(output, NULL, &out_ptr8 );
+	  	//PF_GET_PIXEL_DATA8(input, NULL, &in_ptr8 );
   
 	  	smoothing<PF_Pixel8, KP_PIXEL32>(instance,
 	  											input, output, in_ptr8, out_ptr8, sourceImg, outputImg, renderWindow, nComps);
@@ -1594,6 +1594,7 @@ OfxStatus MainEntryPoint(const char *action, const void *handle, OfxPropertySetH
   // cast to appropriate type
   OfxImageEffectHandle effect = (OfxImageEffectHandle) handle;
   PF_Err      err = PF_Err_NONE;
+  PF_LayerDef *output;
   OfxStatus returnStatus = kOfxStatReplyDefault;
   if(strcmp(action, kOfxActionLoad) == 0) {
     // The very first action called on a plugin.
@@ -1621,7 +1622,7 @@ OfxStatus MainEntryPoint(const char *action, const void *handle, OfxPropertySetH
   }
   else if(strcmp(action, kOfxImageEffectActionRender) == 0) {
     // action called to render a frame
-    returnStatus = RenderAction(effect, inArgs, outArgs);
+    returnStatus = RenderAction(effect, inArgs, outArgs,output);
   }
 
   MESSAGE(": END action is : %s \n", action );
