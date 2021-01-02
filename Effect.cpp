@@ -821,13 +821,39 @@ static PF_Err GlobalSetdown(PF_InData       *in_data,
 //---------------------------------------------------------------------------//
 template<typename PixelType, typename PackedPixelType>
 static OfxStatus smoothing(OfxImageEffectHandle instance,
-						OfxPropertySetHandle inArgs,
-                        OfxPropertySetHandle outArgs,
 						PF_LayerDef *input,
 						PF_LayerDef *output,
 						PixelType	*in_ptr,
-						PixelType	*out_ptr)
+						PixelType	*out_ptr,
+            OfxPropertySetHandle sourceImg,
+            OfxPropertySetHandle outputImg,
+            OfxRectI renderWindow,
+            int nComps)
 {
+  // fetch output image info from the property handle
+  int dstRowBytes;
+  OfxRectI dstBounds;
+  void *dstPtr = NULL;
+  gPropertySuite->propGetInt(outputImg, kOfxImagePropRowBytes, 0, &dstRowBytes);
+  gPropertySuite->propGetIntN(outputImg, kOfxImagePropBounds, 4, &dstBounds.x1);
+  gPropertySuite->propGetPointer(outputImg, kOfxImagePropData, 0, &dstPtr);
+
+  if(dstPtr == NULL) {
+    throw "Bad destination pointer";
+  }
+
+  // fetch input image info from the property handle
+  int srcRowBytes;
+  OfxRectI srcBounds;
+  void *srcPtr = NULL;
+  gPropertySuite->propGetInt(sourceImg, kOfxImagePropRowBytes, 0, &srcRowBytes);
+  gPropertySuite->propGetIntN(sourceImg, kOfxImagePropBounds, 4, &srcBounds.x1);
+  gPropertySuite->propGetPointer(sourceImg, kOfxImagePropData, 0, &srcPtr);
+
+  if(srcPtr == NULL) {
+    throw "Bad source pointer";
+  }
+
 	OfxTime time;
     MyInstanceData *myData = FetchInstanceData(instance);
     double range = 1.0;
@@ -846,7 +872,7 @@ static OfxStatus smoothing(OfxImageEffectHandle instance,
 	preProcess<PixelType>(	in_ptr,
 							input->rowbytes, input->height,
 							&extent_hint,
-							whiteOption ? 1 : 0 );
+							myData->whiteOptionParam );
 	
     //err = PF_COPY(input, output, NULL, NULL);
 
@@ -1260,15 +1286,13 @@ static OfxStatus smoothing(OfxImageEffectHandle instance,
 // 引数   : 
 // 返り値 : 
 //---------------------------------------------------------------------------//
-
+/*
 static OfxStatus Render(OfxImageEffectHandle instance,
-						OfxPropertySetHandle inArgs,
-                        OfxPropertySetHandle outArgs,
                         PF_InData       *in_data,
                         PF_OutData      *out_data,
                         PF_LayerDef *output )
 {
-    PF_Err err = PF_Err_NONE;
+  PF_Err err = PF_Err_NONE;
 	PF_LayerDef *input  = 0;
 
 	PF_Pixel16	*in_ptr16, *out_ptr16;
@@ -1278,7 +1302,7 @@ static OfxStatus Render(OfxImageEffectHandle instance,
 	if( out_ptr16 != NULL && in_ptr16 != NULL )
 	{
 		// 16bpc or 32bpc
-		err = smoothing<PF_Pixel16, KP_PIXEL64>(instance, inArgs, outArgs,
+		err = smoothing<PF_Pixel16, KP_PIXEL64>(instance, 
 												input, output, in_ptr16, out_ptr16 );
 	}
 	else
@@ -1288,7 +1312,7 @@ static OfxStatus Render(OfxImageEffectHandle instance,
 		PF_GET_PIXEL_DATA8(output, NULL, &out_ptr8 );
 		PF_GET_PIXEL_DATA8(input, NULL, &in_ptr8 );
 		
-		err = smoothing<PF_Pixel8, KP_PIXEL32>(instance, inArgs, outArgs,
+		err = smoothing<PF_Pixel8, KP_PIXEL32>(instance,
 												input, output, in_ptr8, out_ptr8 );
 	}
 
@@ -1390,7 +1414,7 @@ void PixelProcessing(OfxImageEffectHandle instance,
     }
   }
 }
-
+*/
 
 ////////////////////////////////////////////////////////////////////////////////
 // Render an output image
@@ -1452,7 +1476,31 @@ OfxStatus RenderAction( OfxImageEffectHandle instance,
     gPropertySuite->propGetString(outputImg, kOfxImageEffectPropPixelDepth, 0, &cstr);
     std::string dataType = cstr;
 
-    if(dataType == kOfxBitDepthByte) {
+    PF_Err err = PF_Err_NONE;
+	  PF_LayerDef *input  = 0;
+    PF_InData       *in_data;
+    PF_LayerDef *output;
+	  PF_Pixel16	*in_ptr16, *out_ptr16;
+	  PF_GET_PIXEL_DATA16(output, NULL, &out_ptr16 );
+	  PF_GET_PIXEL_DATA16(input, NULL, &in_ptr16 );
+
+	  if(dataType == kOfxBitDepthByte)
+	  {
+	  	// 8bpc
+	  	PF_Pixel8	*in_ptr8, *out_ptr8;
+	  	PF_GET_PIXEL_DATA8(output, NULL, &out_ptr8 );
+	  	PF_GET_PIXEL_DATA8(input, NULL, &in_ptr8 );
+  
+	  	smoothing<PF_Pixel8, KP_PIXEL32>(instance,
+	  											input, output, in_ptr8, out_ptr8, sourceImg, outputImg, renderWindow, nComps);
+	  }
+	  else 
+    {
+	  	// 16bpc or 32bpc
+	  	smoothing<PF_Pixel16, KP_PIXEL64>(instance, 
+	  											input, output, in_ptr16, out_ptr16, sourceImg, outputImg, renderWindow, nComps);
+	  }
+    /*if(dataType == kOfxBitDepthByte) {
       PixelProcessing<unsigned char, 255>(instance, sourceImg, outputImg, renderWindow, nComps);
     }
     else if(dataType == kOfxBitDepthShort) {
@@ -1464,7 +1512,7 @@ OfxStatus RenderAction( OfxImageEffectHandle instance,
     else {
       throw " bad data type!";
       throw 1;
-    }
+    }*/
 
   }
   catch(const char *errStr ) {
