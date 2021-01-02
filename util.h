@@ -6,15 +6,15 @@
 #include <string>
 #include <math.h>
 
-#include "AEConfig.h"
+//#include "AEConfig.h"
 
 #include "AE_Effect.h"
-#include "A.h"
+//#include "A.h"
 //#include "AE_EffectUI.h"
 //#include "SPSuites.h"
 //#include "AE_AdvEffectSuites.h"
 //#include "AE_EffectCBSuites.h"
-#include "AE_Macros.h"
+//#include "AE_Macros.h"
 //#include "AE_GeneralPlug.h"
 
 #include "version.h"
