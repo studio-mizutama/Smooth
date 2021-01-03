@@ -7,8 +7,8 @@
 #include <math.h>
 
 //#include "AEConfig.h"
-
-#include "AE_Effect.h"
+#include "ofxImageEffect.h"
+//#include "AE_Effect.h"
 //#include "A.h"
 //#include "AE_EffectUI.h"
 //#include "SPSuites.h"

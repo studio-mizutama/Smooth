@@ -3,8 +3,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-//#include "AE_Effect.h"
-#include "AE_EffectCB.h"
+#include "AE_Effect.h"
+//#include "AE_EffectCB.h"
 //#include "AE_Macros.h"
 
 //#include "Param_Utils.h"
@@ -28,7 +28,7 @@
 #include <iostream>
 
 // the one OFX header we need, it includes the others necessary
-#include "../openfx/include/ofxImageEffect.h"
+#include "ofxImageEffect.h"
 
 #if defined __APPLE__ || defined linux
 #  define EXPORT __attribute__((visibility("default")))
@@ -872,7 +872,7 @@ PF_InData   *in_data,
 							&extent_hint,
 							whiteOption != 0 );
 	
-    err = PF_COPY(input, output, NULL, NULL);
+    //err = PF_COPY(input, output, NULL, NULL);
     int     in_width,in_height, out_width, out_height, i,j;
     long    in_target, out_target;
     unsigned int range = (rangeI * (getMaxValue<PixelType>() * 4)) / 100; 
@@ -891,8 +891,8 @@ PF_InData   *in_data,
     info = &blend_info;
 
     // 共通部分を初期化
-    blend_info.input        = input;
-    blend_info.output       = output;
+    blend_info.sourceImg        = sourceImg;
+    blend_info.outputImg       = outputImg;
     blend_info.in_ptr       = in_ptr;
     blend_info.out_ptr      = out_ptr;
     blend_info.range        = range;
@@ -1476,15 +1476,15 @@ OfxStatus RenderAction( OfxImageEffectHandle instance,
 	  PF_LayerDef *input  = 0;
     //PF_LayerDef *output;
 	  PF_Pixel16	*in_ptr16, *out_ptr16;
-	  PF_GET_PIXEL_DATA16(output, NULL, &out_ptr16 );
-	  PF_GET_PIXEL_DATA16(input, NULL, &in_ptr16 );
+	  //PF_GET_PIXEL_DATA16(output, NULL, &out_ptr16 );
+	  //PF_GET_PIXEL_DATA16(input, NULL, &in_ptr16 );
 
 	  if(dataType == kOfxBitDepthByte)
 	  {
 	  	// 8bpc
 	  	PF_Pixel8	*in_ptr8, *out_ptr8;
-	  	PF_GET_PIXEL_DATA8(output, NULL, &out_ptr8 );
-	  	PF_GET_PIXEL_DATA8(input, NULL, &in_ptr8 );
+	  	//PF_GET_PIXEL_DATA8(output, NULL, &out_ptr8 );
+	  	//PF_GET_PIXEL_DATA8(input, NULL, &in_ptr8 );
   
 	  	smoothing<PF_Pixel8, KP_PIXEL32>(instance,in_data,
 	  											input, output, in_ptr8, out_ptr8, sourceImg, outputImg, renderWindow, nComps);
