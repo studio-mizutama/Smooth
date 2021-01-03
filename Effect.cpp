@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "AE_Effect.h"
+//#include "AE_Effect.h"
 //#include "AE_EffectCB.h"
 //#include "AE_Macros.h"
 
@@ -81,7 +81,11 @@
 #define WHITE_OPTION_PARAM_NAME "whiteOption"
 #define RANGE_PARAM_NAME "range"
 #define LINE_WEIGHT_PARAM_NAME "lineWeight"
+typedef struct {
+	A_long left, top, right, bottom;
+} PF_LRect;
 
+typedef PF_LRect	PF_Rect;
 ////////////////////////////////////////////////////////////////////////////////
 // set of suite pointers provided by the host
 OfxHost               *gHost;
@@ -821,9 +825,6 @@ static PF_Err GlobalSetdown(PF_InData       *in_data,
 //---------------------------------------------------------------------------//
 template<typename PixelType, typename PackedPixelType>
 static OfxStatus smoothing(OfxImageEffectHandle instance,
-PF_InData   *in_data,
-						PF_LayerDef *input,
-						PF_LayerDef *output,
 						PixelType	*in_ptr,
 						PixelType	*out_ptr,
             OfxPropertySetHandle sourceImg,
@@ -855,7 +856,7 @@ PF_InData   *in_data,
   if(srcPtr == NULL) {
     throw "Bad source pointer";
   }
-  PF_Err	err;
+  //PF_Err	err;
   MyInstanceData *myData = FetchInstanceData(instance);
 	PF_Rect extent_hint;
     BEGIN_PROFILE();
@@ -868,7 +869,7 @@ PF_InData   *in_data,
 
 	// 白抜き & 領域情報取得
 	preProcess<PixelType>(	in_ptr,
-							input->rowbytes, input->height,
+							sourceImg->rowbytes, sourceImg->height,
 							&extent_hint,
 							whiteOption != 0 );
 	
@@ -880,10 +881,10 @@ PF_InData   *in_data,
     bool        lack_flg;
     float weight;
 
-    in_width    = GET_WIDTH(input);
-    in_height   = GET_HEIGHT(input);
-    out_width   = GET_WIDTH(output);
-    out_height  = GET_HEIGHT(output);
+    in_width    = GET_WIDTH(sourceImg);
+    in_height   = GET_HEIGHT(sourceImg);
+    out_width   = GET_WIDTH(outputImg);
+    out_height  = GET_HEIGHT(outputImg);
 
 
     BlendingInfo<PixelType>    blend_info, *info;
@@ -957,7 +958,7 @@ PF_InData   *in_data,
                 if( mode_flg != 0 )
                 {
                     // 次のピクセルがlackである可能性あり
-                    if( i < input->width-2 && (mode_flg & 1<<0))
+                    if( i < sourceImg->width-2 && (mode_flg & 1<<0))
 					{
                         lack_flg = true;
 					}
@@ -1237,7 +1238,7 @@ PF_InData   *in_data,
                     }
                     
 					// 突起mode3
-                    if(i < input->width-2)
+                    if(i < sourceImg->width-2)
                     {
                         // 初期化 //
                         blend_info.i            = i+1;
@@ -1264,15 +1265,15 @@ PF_InData   *in_data,
         }
     }
 	
-	DEBUG_PIXEL( out_ptr, output, extent_hint.left, extent_hint.top );
-	DEBUG_PIXEL( out_ptr, output, extent_hint.left, extent_hint.bottom );
-	DEBUG_PIXEL( out_ptr, output, extent_hint.right, extent_hint.top );
-	DEBUG_PIXEL( out_ptr, output, extent_hint.right, extent_hint.bottom );
+	DEBUG_PIXEL( out_ptr, outputImg, extent_hint.left, extent_hint.top );
+	DEBUG_PIXEL( out_ptr, outputImg, extent_hint.left, extent_hint.bottom );
+	DEBUG_PIXEL( out_ptr, outputImg, extent_hint.right, extent_hint.top );
+	DEBUG_PIXEL( out_ptr, outputImg, extent_hint.right, extent_hint.bottom );
 
 
     END_PROFILE();
 
-	return err;
+	//eturn err;
 }
 
 
@@ -1416,7 +1417,7 @@ void PixelProcessing(OfxImageEffectHandle instance,
 // Render an output image
 OfxStatus RenderAction( OfxImageEffectHandle instance,
                         OfxPropertySetHandle inArgs,
-                        OfxPropertySetHandle outArgs,PF_LayerDef *output,PF_InData       *in_data)
+                        OfxPropertySetHandle outArgs)
 {
   // get the render window and the time from the inArgs
   OfxTime time;
@@ -1473,7 +1474,7 @@ OfxStatus RenderAction( OfxImageEffectHandle instance,
     std::string dataType = cstr;
 
     //PF_Err err = PF_Err_NONE;
-	  PF_LayerDef *input  = 0;
+	  //PF_LayerDef *input  = 0;
     //PF_LayerDef *output;
 	  PF_Pixel16	*in_ptr16, *out_ptr16;
 	  //PF_GET_PIXEL_DATA16(output, NULL, &out_ptr16 );
@@ -1486,13 +1487,13 @@ OfxStatus RenderAction( OfxImageEffectHandle instance,
 	  	//PF_GET_PIXEL_DATA8(output, NULL, &out_ptr8 );
 	  	//PF_GET_PIXEL_DATA8(input, NULL, &in_ptr8 );
   
-	  	smoothing<PF_Pixel8, KP_PIXEL32>(instance,in_data,
-	  											input, output, in_ptr8, out_ptr8, sourceImg, outputImg, renderWindow, nComps);
+	  	smoothing<PF_Pixel8, KP_PIXEL32>(instance,
+	  											 in_ptr8, out_ptr8, sourceImg, outputImg, renderWindow, nComps);
 	  }
 	  else {
 	  	// 16bpc or 32bpc
-	  	smoothing<PF_Pixel16, KP_PIXEL64>(instance, in_data,
-	  											input, output, in_ptr16, out_ptr16, sourceImg, outputImg, renderWindow, nComps);
+	  	smoothing<PF_Pixel16, KP_PIXEL64>(instance, 
+	  											 in_ptr16, out_ptr16, sourceImg, outputImg, renderWindow, nComps);
 	  }
     /*if(dataType == kOfxBitDepthByte) {
       PixelProcessing<unsigned char, 255>(instance, sourceImg, outputImg, renderWindow, nComps);
@@ -1587,9 +1588,8 @@ OfxStatus MainEntryPoint(const char *action, const void *handle, OfxPropertySetH
   MESSAGE(": START action is : %s \n", action );
   // cast to appropriate type
   OfxImageEffectHandle effect = (OfxImageEffectHandle) handle;
-  PF_Err      err = PF_Err_NONE;
-  PF_LayerDef *output;
-  PF_InData       *in_data;
+  //PF_Err      err = PF_Err_NONE;
+  //PF_LayerDef *output;
   OfxStatus returnStatus = kOfxStatReplyDefault;
   if(strcmp(action, kOfxActionLoad) == 0) {
     // The very first action called on a plugin.
@@ -1617,7 +1617,7 @@ OfxStatus MainEntryPoint(const char *action, const void *handle, OfxPropertySetH
   }
   else if(strcmp(action, kOfxImageEffectActionRender) == 0) {
     // action called to render a frame
-    returnStatus = RenderAction(effect, inArgs, outArgs,output,in_data);
+    returnStatus = RenderAction(effect, inArgs, outArgs);
   }
 
   MESSAGE(": END action is : %s \n", action );

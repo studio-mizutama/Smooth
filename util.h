@@ -1,8 +1,12 @@
 
 #ifndef __UTIL_H
 #define __UTIL_H
-
-
+typedef uint16_t		A_u_short;
+typedef uint8_t			A_u_char;
+typedef double			A_FpLong;
+typedef float			A_FpShort;
+typedef int32_t			A_long;
+typedef A_long PF_WorldFlags;
 #include <string>
 #include <math.h>
 
@@ -24,10 +28,49 @@
 #ifdef  AE_OS_WIN
 #include <windows.h>
 #endif
+#ifndef A_INTERNAL
 
+	// Basic pixel defn's
+	typedef struct {
+		A_u_char	alpha, red, green, blue;
+	} PF_Pixel;
+
+	typedef PF_Pixel		PF_Pixel8;
+	typedef PF_Pixel		PF_UnionablePixel;
+
+	typedef struct {
+		#ifdef PF_PIXEL16_RENAME_COMPONENTS
+			// this style is useful for debugging code converted from 8 bit
+			A_u_short		alphaSu, redSu, greenSu, blueSu;
+		#else
+			A_u_short		alpha, red, green, blue;
+		#endif
+	} PF_Pixel16;
+	
+	typedef A_FpShort			PF_FpShort;
+	typedef A_FpLong			PF_FpLong;
+
+	typedef struct {
+		PF_FpShort				alpha, red, green, blue;
+	} PF_PixelFloat, PF_Pixel32;
+	
+	typedef struct {
+		PF_FpLong				mat[3][3];
+	} PF_FloatMatrix;
+
+#endif
+typedef A_u_long	PF_PixLong;
+
+typedef struct _PF_PixelOpaque	*PF_PixelOpaquePtr;
+
+#ifdef PF_DEEP_COLOR_AWARE
+	typedef PF_PixelOpaquePtr		PF_PixelPtr;
+#else
+	typedef PF_Pixel				*PF_PixelPtr;
+#endif
 //---------------------------------------------------------------------------//
 // エラー処理
-#define ACALL( fct)                                             \
+/*#define ACALL( fct)                                             \
 {                                                               \
     if ( err == A_Err_NONE )                                    \
         if (  A_Err_NONE != ( err = (fct) ))                    \
@@ -51,7 +94,7 @@ struct APIErr
 
 
 
-void PrintAPIErr( APIErr *perr);
+void PrintAPIErr( APIErr *perr);*/
 
 
 
@@ -347,16 +390,16 @@ void CreateGanmmaTable(u_char table[256], float Ganmma);
 
 
 ///// デバック色の種類 ///////
-template<typename PixelType> void SetDebugPixel(PixelType *out_ptr, PF_LayerDef *output, int x, int y);
-template<typename PixelType> void SetDebugPixel(PixelType *out_ptr, PF_LayerDef *output, long target );
+template<typename PixelType> void SetDebugPixel(PixelType *out_ptr, OfxPropertySetHandle outputImg, int x, int y);
+template<typename PixelType> void SetDebugPixel(PixelType *out_ptr, OfxPropertySetHandle outputImg, long target );
 
 
 #ifdef _DEBUG
-#define DEBUG_PIXEL(out_ptr, output, x, y )    SetDebugPixel( (out_ptr), (output), (x), (y) )
-#define DEBUG_TARGET_PIXEL(out_ptr, output, t )    SetDebugPixel( (out_ptr), (output), (t) )
+#define DEBUG_PIXEL(out_ptr, outputImg, x, y )    SetDebugPixel( (out_ptr), (outputImg), (x), (y) )
+#define DEBUG_TARGET_PIXEL(out_ptr, outputImg, t )    SetDebugPixel( (out_ptr), (outputImg), (t) )
 #else
-#define DEBUG_PIXEL(out_ptr, output, x, y )		((void)0)
-#define DEBUG_TARGET_PIXEL(out_ptr, output, t ) ((void)0)
+#define DEBUG_PIXEL(out_ptr, outputImg, x, y )		((void)0)
+#define DEBUG_TARGET_PIXEL(out_ptr, outputImg, t ) ((void)0)
 #endif
 
 
