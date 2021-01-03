@@ -6,6 +6,7 @@ typedef uint8_t			A_u_char;
 typedef double			A_FpLong;
 typedef float			A_FpShort;
 typedef int32_t			A_long;
+typedef uint32_t		A_u_long;
 typedef A_long PF_WorldFlags;
 #include <string>
 #include <math.h>
@@ -68,6 +69,17 @@ typedef struct _PF_PixelOpaque	*PF_PixelOpaquePtr;
 #else
 	typedef PF_Pixel				*PF_PixelPtr;
 #endif
+typedef struct {
+	A_long left, top, right, bottom;
+} PF_LRect;
+
+typedef PF_LRect	PF_Rect;
+typedef PF_Rect		PF_UnionableRect;
+typedef struct {
+	A_long		num;	/* numerator */
+	A_u_long	den;	/* denominator */
+} PF_RationalScale;
+
 //---------------------------------------------------------------------------//
 // エラー処理
 /*#define ACALL( fct)                                             \
