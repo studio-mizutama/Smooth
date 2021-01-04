@@ -43,8 +43,8 @@ $(NAME).o : $(NAME).cpp
 
 # install it
 install : $(NAME).ofx
-	mkdir -p ../built_plugins
-	cp -r $(NAME).ofx.bundle ../built_plugins
+	mkdir -p /Library/OFX/Plugins
+	cp -r $(NAME).ofx.bundle /Library/OFX/Plugins
 
 # clean it
 clean :
