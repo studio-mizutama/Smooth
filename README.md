@@ -66,7 +66,7 @@ mock
 
 We tried something in *develop* branch. In this branch, we have compire error and could not to built.
 
-In *mock* branch, we are able to built with `make` command and install with `make install` command,  DaVinci Resolve can read the plug-in with no error, correct GUI can be displayed, but it does not work.
+In *mock* branch, we are able to built with `make` command and install with `sudo make install` command,  DaVinci Resolve can read the plug-in with no error, correct GUI can be displayed, but it does not work.
 
 ### How to built
 #### Usable After Effects plug-in
@@ -76,7 +76,7 @@ In master branch, open `Mac/smooth.xcodeproj` and built.
 ```sh
 $ cd Smooth/
 $ make
-$ make install
+$ sudo make install
 ```
 
 # To contributors
