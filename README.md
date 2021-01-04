@@ -11,15 +11,25 @@ But now we try DaVinci Resolve to replace After Effects. But DaVinci Resolove ha
 ## How it works
 ### In After Effects
 ![AEoriginal](img/AEoriginal.png)
+This is an original image with no anti-alias.
 
 ![AErange](img/AErange.png)
+*Range* sets the pixel size of smoothing.
+- MIN 0
+- MAX 10
+- DEF 1
 
 ![AElineWeight](img/AElineWeight.png)
-
+*LineWeight* sets the weight of the line..
+- MIN 0
+- MAX 1
+- DEF 0
 ![AEtransparent](img/AEtransparent.png)
+Checked *Transparent*, white pixels will be transparent.
 
 ### In DaVinci Resolve
 ![OFXoriginal](img/OFXoriginal.png)
+In DaVinci Resolve, it is displayed as this image.
 
 ## OpenFX API
 
@@ -27,7 +37,7 @@ OpenFX is the plug-in standard adopted by DaVinci Resolve. To work in DaVinci Re
 
 ## After Effects SDK
 
-Developed as After Effects plug-in, Smooth has many functions that depend on After Effects SDK. So we must know this SDK's specification, to port the plug-in to OpenFX. We are able to download After Effects SDK in here.
+Developed as After Effects plug-in, Smooth has many functions that depend on After Effects SDK. So we must know this SDK's specification, to port the plug-in to OpenFX. We are able to download After Effects SDK in [here](https://console.adobe.io/downloads/ae).
 
 ## Developing environment
 
