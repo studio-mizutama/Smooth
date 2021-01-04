@@ -51,7 +51,7 @@ Developed as After Effects plug-in, Smooth has many functions that depend on Aft
 ### Directory tree
 ```
 |
-`- sdk/ (rename of After Effects CC 2019 SDK)
+`- sdk/ (rename of After Effects SDK 2020)
 `- openfx/
 `- Smooth/
 ```
