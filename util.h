@@ -5,7 +5,7 @@
 
 #include <string>
 #include <math.h>
-
+#include "ofxImageEffect.h"
 #include "AEConfig.h"
 
 #include "AE_Effect.h"

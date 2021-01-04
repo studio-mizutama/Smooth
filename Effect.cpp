@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
+#include "ofxImageEffect.h"
 #include "AE_Effect.h"
 #include "AE_EffectCB.h"
 #include "AE_Macros.h"
