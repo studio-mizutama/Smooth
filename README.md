@@ -10,26 +10,29 @@ But now we try DaVinci Resolve to replace After Effects. But DaVinci Resolove ha
 
 ## How it works
 ### In After Effects
+#### This is an original image with no anti-alias.
 ![AEoriginal](img/AEoriginal.png)
-This is an original image with no anti-alias.
 
+#### *Range* sets the pixel size of smoothing.
 ![AErange](img/AErange.png)
-*Range* sets the pixel size of smoothing.
+
 - MIN 0
 - MAX 10
 - DEF 1
 
+#### *LineWeight* sets the weight of the line.
 ![AElineWeight](img/AElineWeight.png)
-*LineWeight* sets the weight of the line..
+
 - MIN 0
 - MAX 1
 - DEF 0
+
+#### Checked *Transparent*, white pixels will be transparent.
 ![AEtransparent](img/AEtransparent.png)
-Checked *Transparent*, white pixels will be transparent.
 
 ### In DaVinci Resolve
+#### In DaVinci Resolve, it is displayed as this image.
 ![OFXoriginal](img/OFXoriginal.png)
-In DaVinci Resolve, it is displayed as this image.
 
 ## OpenFX API
 
