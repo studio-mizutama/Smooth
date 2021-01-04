@@ -35,7 +35,7 @@ struct Cinfo
 template <typename PixelType>
 struct BlendingInfo
 {
-    OfxPropertySetHandle sourceImg, outputImg;    // 入出力画像
+    PF_LayerDef *input, *output;    // 入出力画像
 	PixelType			*in_ptr, *out_ptr;	// 画像データへのポインタ
     int                 i,j;                // 現在処理中の座標値
     long                in_target,          // 処理中の座標値の1次配列インデックス  (inputに対する)

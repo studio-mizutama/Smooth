@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-//#include "AE_Effect.h"
+#include "AE_Effect.h"
 //#include "AE_EffectCB.h"
 //#include "AE_Macros.h"
 
@@ -895,8 +895,8 @@ static OfxStatus smoothing(OfxImageEffectHandle instance,
     info = &blend_info;
 
     // 共通部分を初期化
-    blend_info.sourceImg        = sourceImg;
-    blend_info.outputImg       = outputImg;
+    blend_info.input        = input;
+    blend_info.output       = output;
     blend_info.in_ptr       = in_ptr;
     blend_info.out_ptr      = out_ptr;
     blend_info.range        = range;
