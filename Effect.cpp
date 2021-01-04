@@ -7,8 +7,8 @@
 #include "AE_EffectCB.h"
 #include "AE_Macros.h"
 
-//#include "Param_Utils.h"
-//#include "version.h"
+#include "Param_Utils.h"
+#include "version.h"
 #include "util.h"
 
 
@@ -19,7 +19,7 @@
 #include "8link.h"
 #include "Lack.h"
 
-//#include "Effect.h"
+#include "Effect.h"
 
 #include <string.h>
 #include <math.h>
