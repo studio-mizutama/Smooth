@@ -83,7 +83,9 @@ $ sudo make install
 ```
 
 # To contributors
-We are looking for contributors to help us.  We are preparing rewards for those who help.
+We are looking for contributors to help us.  
+<!--
+We are preparing rewards for those who help.
 
 ## Environment
 - Fork this repository and clone to your local machine.
@@ -101,3 +103,4 @@ We are looking for contributors to help us.  We are preparing rewards for those 
 - Please pull request.
 - Success to built and correct operation in our local machine, we will merge your pull request.
 - That is everything to do!
+-->
