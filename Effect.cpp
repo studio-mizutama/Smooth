@@ -500,7 +500,7 @@ static PF_Err smoothing(PF_InData   *in_data,
     blend_info.in_ptr       = in_ptr;
     blend_info.out_ptr      = out_ptr;
     blend_info.range        = range;
-    blend_info.LineWeight   = lineWeight;
+    blend_info.LineWeight   = line_weight;
     
 	// 領域情報を加工
 	if( extent_hint.top == 0 )			extent_hint.top = 1;

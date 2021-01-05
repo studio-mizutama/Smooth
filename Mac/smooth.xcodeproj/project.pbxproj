@@ -35,7 +35,7 @@
 		8F8764F01F74F0AD0035727D /* util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = util.h; path = ../util.h; sourceTree = "<group>"; };
 		8F8764F11F74F0AD0035727D /* upMode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = upMode.cpp; path = ../upMode.cpp; sourceTree = "<group>"; };
 		8F8764F21F74F0AD0035727D /* version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = version.h; path = ../version.h; sourceTree = "<group>"; };
-		C4E618CC095A3CE80012CA3F /* smooth.ofx.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = smooth.ofx.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		C4E618CC095A3CE80012CA3F /* smooth.plugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = smooth.plugin; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,7 +77,7 @@
 		C4E6188C095A3C800012CA3F /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				C4E618CC095A3CE80012CA3F /* smooth.ofx.bundle */,
+				C4E618CC095A3CE80012CA3F /* smooth.plugin */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -108,7 +108,7 @@
 			);
 			name = smooth;
 			productName = Skeleton.plugin;
-			productReference = C4E618CC095A3CE80012CA3F /* smooth.ofx.bundle */;
+			productReference = C4E618CC095A3CE80012CA3F /* smooth.plugin */;
 			productType = "com.apple.product-type.bundle";
 		};
 /* End PBXNativeTarget section */
@@ -239,11 +239,11 @@
 				GENERATE_PKGINFO_FILE = YES;
 				INFOPLIST_FILE = "smooth.plugin-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 11.1;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PRODUCT_BUNDLE_IDENTIFIER = tv.loilo.smooth;
 				PRODUCT_NAME = smooth;
 				SDKROOT = macosx;
-				WRAPPER_EXTENSION = ofx.bundle;
+				WRAPPER_EXTENSION = plugin;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -312,11 +312,11 @@
 				GENERATE_PKGINFO_FILE = YES;
 				INFOPLIST_FILE = "smooth.plugin-Info.plist";
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
-				MACOSX_DEPLOYMENT_TARGET = 11.1;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PRODUCT_BUNDLE_IDENTIFIER = tv.loilo.smooth;
 				PRODUCT_NAME = smooth;
 				SDKROOT = macosx;
-				WRAPPER_EXTENSION = ofx.bundle;
+				WRAPPER_EXTENSION = plugin;
 				ZERO_LINK = NO;
 			};
 			name = Debug;
