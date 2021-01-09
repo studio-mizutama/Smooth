@@ -83,7 +83,7 @@ $ sudo make install
 ```
 
 # To contributors
-We are looking for contributors to help project.  
+We are looking for contributors to help this project.  
 <!--
 We are preparing rewards for those who help.
 
