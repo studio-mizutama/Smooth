@@ -6,7 +6,7 @@
 
 Animation cells are painted with no anti-alias, so we must make the cells smooth in composition process. Generally, Adobe After Effects is industrial primary choice for composition.
 
-In our effort to replace After Effects with DaVinci Resolve by BlackMagic Design, which is more generic and modernized tool, there is a need of making Smooth Plugin compatible to DaVinci Resolve.
+In our effort to replace After Effects with DaVinci Resolve by Blackmagic Design, which is more generic and modernized tool, there is a need of making Smooth Plugin compatible to DaVinci Resolve.
 
 ## How it works
 ### In After Effects
@@ -67,13 +67,13 @@ mock
 ```
 *master* is clean branch. we only added OpenFX headers to `Util.h` and `Effect.cpp`, created `Makefile` and `.gitignore`.
 
-We tried something in *develop* branch. In this branch, we have compire error and could not to built.
+We did some editing in *develop* branch. In this branch, we have compile error and could not built.
 
 In *mock* branch, we are able to built with `make` command and install with `sudo make install` command,  DaVinci Resolve can read the plug-in with no error, correct GUI can be displayed, but it does not work.
 
-### How to built
+### How to build
 #### Usable After Effects plug-in
-In master branch, open `Mac/smooth.xcodeproj` and built.
+In master branch, open `Mac/smooth.xcodeproj` and build.
 
 #### OpenFX plug-in
 ```sh
@@ -83,7 +83,7 @@ $ sudo make install
 ```
 
 # To contributors
-We are looking for contributors to help us.  
+We are looking for contributors to help project.  
 <!--
 We are preparing rewards for those who help.
 
@@ -94,12 +94,12 @@ We are preparing rewards for those who help.
 ## Coding
 - We have no coding rules.
 - Use English when writing natural language, such as comment, commit message, etc.
-- When disable the original code, comment out it never erasing.
+- When disable the original code, comment out it never erase.
 
 ## Testing
 - No Need to write test codes.
 
-## Complite
+## Complete
 - Please pull request.
 - Success to built and correct operation in our local machine, we will merge your pull request.
 - That is everything to do!
