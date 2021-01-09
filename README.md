@@ -2,11 +2,11 @@
 
 ## About this project
 
-[Smooth](https://github.com/loilo-inc/smooth) is a After Effects plug-in, created by Loilo, that makes animation cells smooth.
+[Smooth](https://github.com/loilo-inc/smooth) is an Adobe After Effects plug-in, created by Loilo, which makes animation cells smooth.
 
-Animation cells are painted with no anti-alias, so we must make the cells smooth in composition process. Usually, After Effects is used in such a composition process, so Smooth is developed as a After Effects plug-in.
+Animation cells are painted with no anti-alias, so we must make the cells smooth in composition process. Generally, Adobe After Effects is industrial primary choice for composition.
 
-But now we try DaVinci Resolve to replace After Effects. But DaVinci Resolove has no function to smooth animation cells. So we are trying to port Smooth to work in DaVinci Resolve.
+In our effort to replace After Effects with DaVinci Resolve by BlackMagic Design, which is more generic and modernized tool, there is a need of making Smooth Plugin compatible to DaVinci Resolve.
 
 ## How it works
 ### In After Effects
@@ -89,7 +89,7 @@ We are preparing rewards for those who help.
 
 ## Environment
 - Fork this repository and clone to your local machine.
-- Need not to match environment to ours, such as OS, compiler, and any software versions. But let us know your environment.
+- No Need to match environment to ours, such as OS, compiler, and any software versions. But let us know your environment.
 
 ## Coding
 - We have no coding rules.
@@ -97,7 +97,7 @@ We are preparing rewards for those who help.
 - When disable the original code, comment out it never erasing.
 
 ## Testing
-- Need not to write test codes.
+- No Need to write test codes.
 
 ## Complite
 - Please pull request.
