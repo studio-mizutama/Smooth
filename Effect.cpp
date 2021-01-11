@@ -983,7 +983,7 @@ template<typename PixelType, typename PackedPixelType>
 void smoothing(OfxImageEffectHandle instance,
             	  unsigned int range,
     float lineWeight,
-    int whiteOption,
+    bool whiteOption,
 						PixelType	*in_ptr,
 						PixelType	*out_ptr,
             Image &sourceImg,
@@ -1010,7 +1010,7 @@ void smoothing(OfxImageEffectHandle instance,
 	preProcess<PixelType>(	in_ptr,
 							input->rowbytes, input->height,
 							&extent_hint,
-							whiteOption != 0 );
+							whiteOption);
 	
     //err = PF_COPY(input, output, NULL, NULL);
     int     in_width,in_height, out_width, out_height, i,j;
@@ -1613,12 +1613,12 @@ OfxStatus RenderAction( OfxImageEffectHandle instance,
 	  	//PF_GET_PIXEL_DATA8(output, NULL, &out_ptr8 );
 	  	//PF_GET_PIXEL_DATA8(input, NULL, &in_ptr8 );
   
-	  	smoothing<PF_Pixel8, KP_PIXEL32>(instance,range,lineWeight,whiteOption,
+	  	smoothing<PF_Pixel8, KP_PIXEL32>(instance,range,lineWeight,whiteOption != 0,
 	  											 in_ptr8, out_ptr8, sourceImg, outputImg, renderWindow);
 	  }
 	  else if (outputImg.bytesPerComponent() <= 4){
 	  	// 16bpc or 32bpc
-	  	smoothing<PF_Pixel16, KP_PIXEL64>(instance,range,lineWeight,whiteOption,
+	  	smoothing<PF_Pixel16, KP_PIXEL64>(instance,range,lineWeight,whiteOption != 0,
 	  											 in_ptr16, out_ptr16, sourceImg, outputImg, renderWindow);
 	  }
     else {
