@@ -999,6 +999,10 @@ void smoothing(OfxImageEffectHandle instance,
   input->rowbytes = sourceImg.rowBytes_;
   input->width = renderWindow.x2;
   input->height = renderWindow.y2;
+  extent_hint.left = renderWindow.x1;
+  extent_hint.top = renderWindow.y1;
+  extent_hint.right = renderWindow.x2;
+  extent_hint.bottom = renderWindow.y2;
   input->extent_hint.left = renderWindow.x1;
   input->extent_hint.top = renderWindow.y1;
   input->extent_hint.right = renderWindow.x2;
@@ -1404,10 +1408,10 @@ void smoothing(OfxImageEffectHandle instance,
         }
     }
 	
-	//DEBUG_PIXEL( out_ptr, output, extent_hint.left, extent_hint.top );
-	//DEBUG_PIXEL( out_ptr, output, extent_hint.left, extent_hint.bottom );
-	//DEBUG_PIXEL( out_ptr, output, extent_hint.right, extent_hint.top );
-	//DEBUG_PIXEL( out_ptr, output, extent_hint.right, extent_hint.bottom );
+	DEBUG_PIXEL( out_ptr, output, extent_hint.left, extent_hint.top );
+	DEBUG_PIXEL( out_ptr, output, extent_hint.left, extent_hint.bottom );
+	DEBUG_PIXEL( out_ptr, output, extent_hint.right, extent_hint.top );
+	DEBUG_PIXEL( out_ptr, output, extent_hint.right, extent_hint.bottom );
 
 
     //END_PROFILE();
