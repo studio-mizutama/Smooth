@@ -409,13 +409,12 @@ static inline void ColorKey( PackedPixelType *in_ptr, int row_bytes, int height 
 
 
 template<typename PixelType > 
-static inline void preProcess( PixelType *in_ptr, int row_bytes, int height, PF_Rect *rect, bool is_white_trans )
+static inline void preProcess( PixelType *in_ptr, int row_bytes, int height, PF_Rect *rect, bool is_white_trans,Image &sourceImg )
 {
     PixelType key;
 	PixelType null_pixel;
 	getWhitePixel( &key );	// 0xff or 0x8000
 	getNullPixel( &null_pixel );
-
 	int width = (row_bytes / sizeof(PixelType));
 	
 	int		top=0, left=width, right=0, bottom=0;
@@ -435,14 +434,16 @@ static inline void preProcess( PixelType *in_ptr, int row_bytes, int height, PF_
 			}
 
 			for(int i=0; i<width; i++)
-			{
-				if( key.red == in_ptr[t].red &&
+      {
+        if( key.red == in_ptr[t].red &&
 					key.green == in_ptr[t].green &&
 					key.blue == in_ptr[t].blue )
 				{
 					// 抜き色
 					in_ptr[t] = null_pixel;
-				}
+          PixelType *srcPix = sourceImg.pixelAddress<PixelType>(i, j);
+          *srcPix = in_ptr[t];
+        }
 				else if( in_ptr[t].alpha == 0 )
 				{
 					// すでに抜かれている
@@ -468,8 +469,8 @@ static inline void preProcess( PixelType *in_ptr, int row_bytes, int height, PF_
 					}
 				}
 				t++;
-			}
-		}
+      }
+    }
 	}
 	else
 	{
@@ -1011,36 +1012,35 @@ void smoothing(OfxImageEffectHandle instance,
     //BEGIN_PROFILE();
 
 	// 白抜き & 領域情報取得
-	preProcess<PixelType>(	in_ptr,
-							input->rowbytes, input->height,
-							&extent_hint,
-							whiteOption);
-	
-    //err = PF_COPY(input, output, NULL, NULL);
-    int     in_width,in_height, out_width, out_height, i,j;
-    long    in_target, out_target;
-    range = (range * (getMaxValue<PixelType>() * 4)) / 100; 
-    lineWeight = lineWeight / 2.0 + 0.5;
-    bool        lack_flg;
-    float weight;
+  preProcess<PixelType>(in_ptr,
+                        input->rowbytes, input->height,
+                        &extent_hint,
+                        whiteOption, sourceImg);
 
-    in_width    = GET_WIDTH(input);
-    in_height   = GET_HEIGHT(input);
-    out_width   = GET_WIDTH(output);
-    out_height  = GET_HEIGHT(output);
+  //err = PF_COPY(input, output, NULL, NULL);
+  int in_width, in_height, out_width, out_height, i, j;
+  long in_target, out_target;
+  range = (range * (getMaxValue<PixelType>() * 4)) / 100;
+  lineWeight = lineWeight / 2.0 + 0.5;
+  bool lack_flg;
+  float weight;
 
+  in_width = GET_WIDTH(input);
+  in_height = GET_HEIGHT(input);
+  out_width = GET_WIDTH(output);
+  out_height = GET_HEIGHT(output);
 
-    BlendingInfo<PixelType>    blend_info, *info;
+  BlendingInfo<PixelType> blend_info, *info;
 
-    info = &blend_info;
+  info = &blend_info;
 
-    // 共通部分を初期化
-    blend_info.input        = input;
-    blend_info.output       = output;
-    blend_info.in_ptr       = in_ptr;
-    blend_info.out_ptr      = out_ptr;
-    blend_info.range        = range;
-    blend_info.LineWeight   = lineWeight;
+  // 共通部分を初期化
+  blend_info.input = input;
+  blend_info.output = output;
+  blend_info.in_ptr = in_ptr;
+  blend_info.out_ptr = out_ptr;
+  blend_info.range = range;
+  blend_info.LineWeight = lineWeight;
     
 	// 領域情報を加工
 	if( extent_hint.top == 0 )			extent_hint.top = 1;
