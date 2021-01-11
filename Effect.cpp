@@ -999,7 +999,10 @@ void smoothing(OfxImageEffectHandle instance,
   input->rowbytes = sourceImg.rowBytes_;
   input->width = renderWindow.x2;
   input->height = renderWindow.y2;
-
+  input->extent_hint.left = renderWindow.x1;
+  input->extent_hint.top = renderWindow.y1;
+  input->extent_hint.right = renderWindow.x2;
+  input->extent_hint.bottom = renderWindow.y2;
 
     //BEGIN_PROFILE();
 
@@ -1043,14 +1046,14 @@ void smoothing(OfxImageEffectHandle instance,
 
 
     ///////////////// アンチ処理 //////////////////////////////////////////////////
-    for( j=extent_hint.top; j<extent_hint.bottom; j++)
+    for(int y = renderWindow.y1; y < renderWindow.y2; y++)
     {
         lack_flg = false;
 
         in_target   = j*in_width+extent_hint.left;
         out_target  = j*out_width+extent_hint.left;
 
-        for( i=extent_hint.left; i<extent_hint.right; i++, in_target++, out_target++)
+        for(int x = renderWindow.x1; x < renderWindow.x2; x++, in_target++, out_target++)
         {
             // 欠けである可能性あり
             if( lack_flg )
