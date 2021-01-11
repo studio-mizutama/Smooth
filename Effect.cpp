@@ -132,6 +132,171 @@ MyInstanceData *FetchInstanceData(OfxImageEffectHandle effect)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+  // class to manage OFX images
+  class Image {
+  public    :
+    // construct from a property set that represents the image
+    Image(OfxPropertySetHandle propSet);
+
+    // construct from a clip by fetching an image at the given frame
+    Image(OfxImageClipHandle clip, double frame);
+
+    // destructor
+    ~Image();
+
+    // get a pixel address, cast to the right type
+    template <class T>
+    T *pixelAddress(int x, int y)
+    {
+      return reinterpret_cast<T *>(rawAddress(x, y));
+    }
+
+    // get a pixel address, if it doesn't exist
+    // return a default black pixel
+    template <class T>
+    const T *pixelAddressWithFallback(int x, int y)
+    {
+      const T *pix = pixelAddress<T>(x, y);
+      if(!pix) {
+        static const T blackPix[4] = {0,0,0,0};
+        pix = blackPix;
+      }
+      return pix;
+    }
+
+    // Is this image empty?
+    operator bool();
+
+    // bytes per component, 1, 2 or 4 for byte, short and float images
+    int bytesPerComponent() const { return bytesPerComponent_; }
+
+    // number of components
+    int nComponents() const { return nComponents_; }
+
+    // number of components
+    double pixelAspectRatio() const { return pixelAspectRatio_; }
+
+  //protected :
+    void construct();
+
+    // Look up a pixel address in the image. returns null if the pixel was not
+    // in the bounds of the image
+    void *rawAddress(int x, int y);
+
+    OfxPropertySetHandle propSet_;
+    int rowBytes_;
+    OfxRectI bounds_;
+    char *dataPtr_;
+    int nComponents_;
+    int bytesPerComponent_;
+    int bytesPerPixel_;
+    double pixelAspectRatio_;
+  };
+
+  // construct from a property set
+  Image::Image(OfxPropertySetHandle propSet)
+    : propSet_(propSet)
+  {
+    construct();
+  }
+
+  // construct by fetching from a clip
+  Image::Image(OfxImageClipHandle clip, double time)
+    : propSet_(NULL)
+  {
+    if (clip && (gImageEffectSuite->clipGetImage(clip, time, NULL, &propSet_) == kOfxStatOK)) {
+      construct();
+    }
+    else {
+      propSet_ = NULL;
+    }
+  }
+
+  // assemble it all togther
+  void Image::construct()
+  {
+    if(propSet_) {
+      gPropertySuite->propGetInt(propSet_, kOfxImagePropRowBytes, 0, &rowBytes_);
+      gPropertySuite->propGetIntN(propSet_, kOfxImagePropBounds, 4, &bounds_.x1);
+      gPropertySuite->propGetPointer(propSet_, kOfxImagePropData, 0, (void **) &dataPtr_);
+      gPropertySuite->propGetDouble(propSet_, kOfxImagePropPixelAspectRatio, 0, &pixelAspectRatio_);
+
+      // how many components per pixel?
+      char *cstr;
+      gPropertySuite->propGetString(propSet_, kOfxImageEffectPropComponents, 0, &cstr);
+
+      if(strcmp(cstr, kOfxImageComponentRGBA) == 0) {
+        nComponents_ = 4;
+      }
+      else if(strcmp(cstr, kOfxImageComponentRGB) == 0) {
+        nComponents_ = 3;
+      }
+      else if(strcmp(cstr, kOfxImageComponentAlpha) == 0) {
+        nComponents_ = 1;
+      }
+      else {
+        throw " bad pixel type!";
+      }
+
+      // what is the data type
+      gPropertySuite->propGetString(propSet_, kOfxImageEffectPropPixelDepth, 0, &cstr);
+      if(strcmp(cstr, kOfxBitDepthByte) == 0) {
+        bytesPerComponent_ = 1;
+      }
+      else if(strcmp(cstr, kOfxBitDepthShort) == 0) {
+        bytesPerComponent_ = 2;
+      }
+      else if(strcmp(cstr, kOfxBitDepthFloat) == 0) {
+        bytesPerComponent_ = 4;
+      }
+      else {
+        throw " bad pixel type!";
+      }
+
+      bytesPerPixel_ = bytesPerComponent_ * nComponents_;
+    }
+    else {
+      rowBytes_ = 0;
+      bounds_.x1 = bounds_.x2 = bounds_.y1 = bounds_.y2 = 0;
+      dataPtr_ = NULL;
+      nComponents_ = 0;
+      bytesPerComponent_ = 0;
+    }
+  }
+
+  // destructor
+  Image::~Image()
+  {
+    if(propSet_)
+      gImageEffectSuite->clipReleaseImage(propSet_);
+  }
+
+  // get the address of a location in the image as a void *
+  void *Image::rawAddress(int x, int y)
+  {
+    // Inside the bounds of this image?
+    if(x < bounds_.x1 || x >= bounds_.x2 || y < bounds_.y1 || y >= bounds_.y2)
+      return NULL;
+
+    // turn image plane coordinates into offsets from the bottom left
+    int yOffset = y - bounds_.y1;
+    int xOffset = x - bounds_.x1;
+
+    // Find the start of our row, using byte arithmetic
+    char *rowStart = (dataPtr_) + yOffset * rowBytes_;
+
+    // finally find the position of the first component of column
+    return rowStart + (xOffset * bytesPerPixel_);
+  }
+
+  // are we empty?
+  Image:: operator bool()
+  {
+    return propSet_ != NULL && dataPtr_ != NULL;
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////
 // get the named suite and put it in the given pointer, with error checking
 template <class SUITE>
 void FetchSuite(SUITE *& suite, const char *suiteName, int suiteVersion)
@@ -513,44 +678,35 @@ OfxStatus
 DescribeInContextAction(OfxImageEffectHandle descriptor,
                         OfxPropertySetHandle inArgs)
 {
-  OfxPropertySetHandle props;
-  // define the mandated single output clip
-  gImageEffectSuite->clipDefine(descriptor, "Output", &props);
+    // get the context we are being described for
+    char *context;
+    gPropertySuite->propGetString(inArgs, kOfxImageEffectPropContext, 0, &context);
 
-  // set the component types we can handle on out output
-  gPropertySuite->propSetString(props,
-                                kOfxImageEffectPropSupportedComponents,
-                                0,
-                                kOfxImageComponentRGBA);
-  gPropertySuite->propSetString(props,
-                                kOfxImageEffectPropSupportedComponents,
-                                1,
-                                kOfxImageComponentAlpha);
-  gPropertySuite->propSetString(props,
-                                kOfxImageEffectPropSupportedComponents,
-                                2,
-                                kOfxImageComponentRGB);
+    // what components do we support
+    static const char *supportedComponents[] = {kOfxImageComponentRGBA, kOfxImageComponentRGB, kOfxImageComponentAlpha};
 
-  // define the mandated single source clip
-  gImageEffectSuite->clipDefine(descriptor, "Source", &props);
+    OfxPropertySetHandle props;
+    // define the mandated single output clip
+    gImageEffectSuite->clipDefine(descriptor, "Output", &props);
 
-  // set the component types we can handle on our main input
-  gPropertySuite->propSetString(props,
-                                kOfxImageEffectPropSupportedComponents,
-                                0,
-                                kOfxImageComponentRGBA);
-  gPropertySuite->propSetString(props,
-                                kOfxImageEffectPropSupportedComponents,
-                                1,
-                                kOfxImageComponentAlpha);
-  gPropertySuite->propSetString(props,
-                                kOfxImageEffectPropSupportedComponents,
-                                2,
-                                kOfxImageComponentRGB);
+    // set the component types we can handle on out output
+    gPropertySuite->propSetStringN(props,
+                                   kOfxImageEffectPropSupportedComponents,
+                                   3,
+                                   supportedComponents);
 
-  // first get the handle to the parameter set
-  OfxParamSetHandle paramSet;
-  gImageEffectSuite->getParamSet(descriptor, &paramSet);
+    // define the mandated single source clip
+    gImageEffectSuite->clipDefine(descriptor, "Source", &props);
+
+    // set the component types we can handle on our main input
+    gPropertySuite->propSetStringN(props,
+                                   kOfxImageEffectPropSupportedComponents,
+                                   3,
+                                   supportedComponents);
+
+    // first get the handle to the parameter set
+    OfxParamSetHandle paramSet;
+    gImageEffectSuite->getParamSet(descriptor, &paramSet);
 
   // properties on our parameter
   OfxPropertySetHandle paramProps;
@@ -818,57 +974,34 @@ static PF_Err GlobalSetdown(PF_InData       *in_data,
 
 
 
-
 //---------------------------------------------------------------------------//
 // smoothing実行関数 
 // PixelType		PF_Pixel8, PF_Pixel16
 // PackedPixelType	KP_PIXEL32,	KP_PIXEL64
 //---------------------------------------------------------------------------//
 template<typename PixelType, typename PackedPixelType>
-static OfxStatus smoothing(OfxImageEffectHandle instance,
-						PF_LayerDef *input,
-						PF_LayerDef *output,
+void smoothing(OfxImageEffectHandle instance,
+            	  unsigned int range,
+    float lineWeight,
+    int whiteOption,
 						PixelType	*in_ptr,
 						PixelType	*out_ptr,
-            OfxPropertySetHandle sourceImg,
-            OfxPropertySetHandle outputImg,
-            OfxRectI renderWindow,
-            int nComps)
+            Image &sourceImg,
+            Image &outputImg,
+            OfxRectI renderWindow
+            )
 {
-  OfxTime time;
-  // fetch output image info from the property handle
-  int dstRowBytes;
-  OfxRectI dstBounds;
-  void *dstPtr = NULL;
-  gPropertySuite->propGetInt(outputImg, kOfxImagePropRowBytes, 0, &dstRowBytes);
-  gPropertySuite->propGetIntN(outputImg, kOfxImagePropBounds, 4, &dstBounds.x1);
-  gPropertySuite->propGetPointer(outputImg, kOfxImagePropData, 0, &dstPtr);
 
-  if(dstPtr == NULL) {
-    throw "Bad destination pointer";
-  }
-
-  // fetch input image info from the property handle
-  int srcRowBytes;
-  OfxRectI srcBounds;
-  void *srcPtr = NULL;
-  gPropertySuite->propGetInt(sourceImg, kOfxImagePropRowBytes, 0, &srcRowBytes);
-  gPropertySuite->propGetIntN(sourceImg, kOfxImagePropBounds, 4, &srcBounds.x1);
-  gPropertySuite->propGetPointer(sourceImg, kOfxImagePropData, 0, &srcPtr);
-
-  if(srcPtr == NULL) {
-    throw "Bad source pointer";
-  }
-  //PF_Err	err;
-  MyInstanceData *myData = FetchInstanceData(instance);
 	PF_Rect extent_hint;
-    BEGIN_PROFILE();
-	  unsigned int rangeI = 1;
-    float lineWeightI = 1.0;
-    int whiteOption = 0;
-    gParameterSuite->paramGetValueAtTime(myData->rangeParam, time, &rangeI);
-    gParameterSuite->paramGetValueAtTime(myData->lineWeightParam, time, &lineWeightI);
-    gParameterSuite->paramGetValueAtTime(myData->whiteOptionParam, time, &whiteOption);
+	PF_LayerDef *input;
+	PF_LayerDef *output;
+
+  input->rowbytes = sourceImg.rowBytes_;
+  input->width = renderWindow.x2;
+  input->height = renderWindow.y2;
+
+
+    //BEGIN_PROFILE();
 
 	// 白抜き & 領域情報取得
 	preProcess<PixelType>(	in_ptr,
@@ -879,8 +1012,8 @@ static OfxStatus smoothing(OfxImageEffectHandle instance,
     //err = PF_COPY(input, output, NULL, NULL);
     int     in_width,in_height, out_width, out_height, i,j;
     long    in_target, out_target;
-    unsigned int range = (rangeI * (getMaxValue<PixelType>() * 4)) / 100; 
-    float lineWeight = lineWeightI / 2.0 + 0.5;
+    range = (range * (getMaxValue<PixelType>() * 4)) / 100; 
+    lineWeight = lineWeight / 2.0 + 0.5;
     bool        lack_flg;
     float weight;
 
@@ -895,8 +1028,8 @@ static OfxStatus smoothing(OfxImageEffectHandle instance,
     info = &blend_info;
 
     // 共通部分を初期化
-    blend_info.sourceImg        = sourceImg;
-    blend_info.outputImg       = outputImg;
+    blend_info.input        = input;
+    blend_info.output       = output;
     blend_info.in_ptr       = in_ptr;
     blend_info.out_ptr      = out_ptr;
     blend_info.range        = range;
@@ -1268,13 +1401,13 @@ static OfxStatus smoothing(OfxImageEffectHandle instance,
         }
     }
 	
-	DEBUG_PIXEL( out_ptr, output, extent_hint.left, extent_hint.top );
-	DEBUG_PIXEL( out_ptr, output, extent_hint.left, extent_hint.bottom );
-	DEBUG_PIXEL( out_ptr, output, extent_hint.right, extent_hint.top );
-	DEBUG_PIXEL( out_ptr, output, extent_hint.right, extent_hint.bottom );
+	//DEBUG_PIXEL( out_ptr, output, extent_hint.left, extent_hint.top );
+	//DEBUG_PIXEL( out_ptr, output, extent_hint.left, extent_hint.bottom );
+	//DEBUG_PIXEL( out_ptr, output, extent_hint.right, extent_hint.top );
+	//DEBUG_PIXEL( out_ptr, output, extent_hint.right, extent_hint.bottom );
 
 
-    END_PROFILE();
+    //END_PROFILE();
 
 	//eturn err;
 }
@@ -1420,119 +1553,92 @@ void PixelProcessing(OfxImageEffectHandle instance,
 // Render an output image
 OfxStatus RenderAction( OfxImageEffectHandle instance,
                         OfxPropertySetHandle inArgs,
-                        OfxPropertySetHandle outArgs,PF_LayerDef *output)
+                        OfxPropertySetHandle outArgs)
 {
   // get the render window and the time from the inArgs
   OfxTime time;
   OfxRectI renderWindow;
   OfxStatus status = kOfxStatOK;
+  double renderScale[2];
 
-  gPropertySuite->propGetDouble(inArgs, kOfxPropTime, 0, &time);
-  gPropertySuite->propGetIntN(inArgs, kOfxImageEffectPropRenderWindow, 4, &renderWindow.x1);
+    gPropertySuite->propGetDouble(inArgs,
+                                  kOfxPropTime,
+                                  0,
+                                  &time);
+    gPropertySuite->propGetIntN(inArgs,
+                                kOfxImageEffectPropRenderWindow,
+                                4,
+                                &renderWindow.x1);
+    gPropertySuite->propGetDoubleN(inArgs,
+                                   kOfxImageEffectPropRenderScale,
+                                   2,
+                                   renderScale);
 
-  // fetch output clip
-  OfxImageClipHandle outputClip;
-  gImageEffectSuite->clipGetHandle(instance, "Output", &outputClip, NULL);
-
-  // fetch main input clip
-  OfxImageClipHandle sourceClip;
-  gImageEffectSuite->clipGetHandle(instance, "Source", &sourceClip, NULL);
+  
+  MyInstanceData *myData = FetchInstanceData(instance);
+  unsigned int range = 1;
+  float lineWeight = 1.0;
+  int whiteOption = 0;
+  gParameterSuite->paramGetValueAtTime(myData->rangeParam, time, &range);
+  gParameterSuite->paramGetValueAtTime(myData->lineWeightParam, time, &lineWeight);
+  gParameterSuite->paramGetValueAtTime(myData->whiteOptionParam, time, &whiteOption);
 
   // the property sets holding our images
   OfxPropertySetHandle outputImg = NULL, sourceImg = NULL;
   try {
-    // fetch image to render into from that clip
-    OfxPropertySetHandle outputImg;
-    if(gImageEffectSuite->clipGetImage(outputClip, time, NULL, &outputImg) != kOfxStatOK) {
-      throw " no output image!";
-    }
+      // fetch image to render into from that clip
+      Image outputImg(myData->outputClip, time);
+      if(!outputImg) {
+        throw " no output image!";
+      }
 
-    // fetch image at render time from that clip
-    if (gImageEffectSuite->clipGetImage(sourceClip, time, NULL, &sourceImg) != kOfxStatOK) {
-      throw " no source image!";
-    }
+      // fetch image to render into from that clip
+      Image sourceImg(myData->sourceClip, time);
+      if(!sourceImg) {
+        throw " no source image!";
+      }
 
-    // figure out the data types
-    char *cstr;
-    gPropertySuite->propGetString(outputImg, kOfxImageEffectPropComponents, 0, &cstr);
-    std::string components = cstr;
 
-    // how many components per pixel?
-    int nComps = 0;
-    if(components == kOfxImageComponentRGBA) {
-      nComps = 4;
-    }
-    else if(components == kOfxImageComponentRGB) {
-      nComps = 3;
-    }
-    else if(components == kOfxImageComponentAlpha) {
-      nComps = 1;
-    }
-    else {
-      throw " bad pixel type!";
-    }
-
-    // now do our render depending on the data type
-    gPropertySuite->propGetString(outputImg, kOfxImageEffectPropPixelDepth, 0, &cstr);
-    std::string dataType = cstr;
-
-    //PF_Err err = PF_Err_NONE;
-	  PF_LayerDef *input  = 0;
-    //PF_LayerDef *output;
 	  PF_Pixel16	*in_ptr16, *out_ptr16;
 	  //PF_GET_PIXEL_DATA16(output, NULL, &out_ptr16 );
 	  //PF_GET_PIXEL_DATA16(input, NULL, &in_ptr16 );
-
-	  if(dataType == kOfxBitDepthByte)
+   
+	  if(outputImg.bytesPerComponent() == 1)
 	  {
 	  	// 8bpc
 	  	PF_Pixel8	*in_ptr8, *out_ptr8;
 	  	//PF_GET_PIXEL_DATA8(output, NULL, &out_ptr8 );
 	  	//PF_GET_PIXEL_DATA8(input, NULL, &in_ptr8 );
   
-	  	smoothing<PF_Pixel8, KP_PIXEL32>(instance,
-	  											input, output, in_ptr8, out_ptr8, sourceImg, outputImg, renderWindow, nComps);
+	  	smoothing<PF_Pixel8, KP_PIXEL32>(instance,range,lineWeight,whiteOption,
+	  											 in_ptr8, out_ptr8, sourceImg, outputImg, renderWindow);
 	  }
-	  else {
+	  else if (outputImg.bytesPerComponent() <= 4){
 	  	// 16bpc or 32bpc
-	  	smoothing<PF_Pixel16, KP_PIXEL64>(instance, 
-	  											input, output, in_ptr16, out_ptr16, sourceImg, outputImg, renderWindow, nComps);
+	  	smoothing<PF_Pixel16, KP_PIXEL64>(instance,range,lineWeight,whiteOption,
+	  											 in_ptr16, out_ptr16, sourceImg, outputImg, renderWindow);
 	  }
-    /*if(dataType == kOfxBitDepthByte) {
-      PixelProcessing<unsigned char, 255>(instance, sourceImg, outputImg, renderWindow, nComps);
-    }
-    else if(dataType == kOfxBitDepthShort) {
-      PixelProcessing<unsigned short, 65535>(instance, sourceImg, outputImg, renderWindow, nComps);
-    }
-    else if (dataType == kOfxBitDepthFloat) {
-      PixelProcessing<float, 1>(instance, sourceImg, outputImg, renderWindow, nComps);
-    }
     else {
       throw " bad data type!";
       throw 1;
-    }*/
-
-  }
-  catch(const char *errStr ) {
-    bool isAborting = gImageEffectSuite->abort(instance);
-
-    // if we were interrupted, the failed fetch is fine, just return kOfxStatOK
-    // otherwise, something wierd happened
-    if(!isAborting) {
-      status = kOfxStatFailed;
     }
-    ERROR_IF(!isAborting, " Rendering failed because %s", errStr);
+
 
   }
+    catch(const char *errStr ) {
+      bool isAborting = gImageEffectSuite->abort(instance);
 
-  if(sourceImg)
-    gImageEffectSuite->clipReleaseImage(sourceImg);
-  if(outputImg)
-    gImageEffectSuite->clipReleaseImage(outputImg);
+      // if we were interrupted, the failed fetch is fine, just return kOfxStatOK
+      // otherwise, something wierd happened
+      if(!isAborting) {
+        status = kOfxStatFailed;
+      }
+      ERROR_IF(!isAborting, " Rendering failed because %s", errStr);
+    }
+    // all was well
+    return status;
+  }
 
-  // all was well
-  return status;
-}
 
 
 
@@ -1592,7 +1698,7 @@ OfxStatus MainEntryPoint(const char *action, const void *handle, OfxPropertySetH
   // cast to appropriate type
   OfxImageEffectHandle effect = (OfxImageEffectHandle) handle;
   //PF_Err      err = PF_Err_NONE;
-  PF_LayerDef *output;
+  //PF_LayerDef *output;
   OfxStatus returnStatus = kOfxStatReplyDefault;
   if(strcmp(action, kOfxActionLoad) == 0) {
     // The very first action called on a plugin.
@@ -1620,7 +1726,7 @@ OfxStatus MainEntryPoint(const char *action, const void *handle, OfxPropertySetH
   }
   else if(strcmp(action, kOfxImageEffectActionRender) == 0) {
     // action called to render a frame
-    returnStatus = RenderAction(effect, inArgs, outArgs,output);
+    returnStatus = RenderAction(effect, inArgs, outArgs);
   }
 
   MESSAGE(": END action is : %s \n", action );

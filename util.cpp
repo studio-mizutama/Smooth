@@ -13,7 +13,7 @@
 // 引数   : 
 // 返り値 : 
 //---------------------------------------------------------------------------//
-void PrintAPIErr( APIErr *perr)
+/*void PrintAPIErr( APIErr *perr)
 {
 
 #ifdef  AE_OS_WIN
@@ -26,7 +26,7 @@ void PrintAPIErr( APIErr *perr)
     printf( "%s", str );
 #endif
 
-}
+}*/
 
 
 //---------------------------------------------------------------------------//
